@@ -21,13 +21,55 @@ This setup significantly improved the network’s **coverage**, **stability**, a
 
 ### Network Topology Diagram
 
-```mermaid
 graph TD
-    Internet((Internet))
-    ONU[Huawei ONT Router<br/>Static IP<br/>DHCP Disabled<br/>AP Mode]
-    LBL[LB-Link Router<br/>DHCP Enabled<br/>Primary Router]
-    Devices{{Connected Devices<br/>Phones, Laptops, Smart TV}}
-
-    Internet --> ONU
-    ONU --> LBL
-    LBL --> Devices
+    subgraph "Internet / External Access"
+        Internet((Internet)) --> FW[Load Balancers<br/>& Firewalls]
+    end
+    
+    subgraph "GitHub Edge Network"
+        FW --> CDN[CDN Edge Cache]
+        FW --> DDoS[DDoS Protection]
+        CDN --> API[API Gateway]
+        DDoS --> API
+    end
+    
+    subgraph "GitHub Core Services"
+        API --> Auth[Authentication<br/>Services]
+        API --> WebApp[Web Application<br/>Servers]
+        API --> DBProxy[Database Proxy]
+        
+        WebApp --> StaticAssets[Static Asset<br/>Storage]
+        
+        DBProxy --> PrimaryDB[(Primary Database<br/>Cluster)]
+        DBProxy --> ReadReplicas[(Read Replicas)]
+        
+        Auth --> UserData[(User Data Store)]
+    end
+    
+    subgraph "Git Storage Layer"
+        WebApp --> GitService[Git Service]
+        GitService --> ObjectStorage[(Git Objects<br/>Storage)]
+        GitService --> RepoDB[(Repository<br/>Metadata DB)]
+        
+        ObjectStorage --- BackupService[Backup &<br/>Replication Service]
+    end
+    
+    subgraph "Auxiliary Services"
+        WebApp --> Search[Search Service]
+        WebApp --> CI_CD[CI/CD Runners]
+        WebApp --> Notification[Notification<br/>Service]
+        
+        Search --> SearchIndex[(Search Index)]
+        CI_CD --> ArtifactStorage[(Build Artifacts<br/>Storage)]
+        Notification --> MessageQueue[(Message Queue)]
+    end
+    
+    subgraph "Regional Replication"
+        BackupService --> GeoReplica1[(Geographic<br/>Replica 1)]
+        BackupService --> GeoReplica2[(Geographic<br/>Replica 2)]
+        BackupService --> GeoReplica3[(Geographic<br/>Replica 3)]
+    end
+    
+    Admin[Admin Users] --> FW
+    Developers[Developers] --> FW
+    CITools[External CI/CD<br/>Tools] --> FW
