@@ -22,54 +22,28 @@ This setup significantly improved the network’s **coverage**, **stability**, a
 ### Network Topology Diagram
 
 graph TD
-    subgraph "Internet / External Access"
-        Internet((Internet)) --> FW[Load Balancers<br/>& Firewalls]
-    end
+    Internet((Internet)) --> FW[Load Balancers & Firewalls]
+    FW --> CDN[CDN Edge Cache]
+    FW --> DDoS[DDoS Protection]
+    CDN --> API[API Gateway]
+    DDoS --> API
     
-    subgraph "GitHub Edge Network"
-        FW --> CDN[CDN Edge Cache]
-        FW --> DDoS[DDoS Protection]
-        CDN --> API[API Gateway]
-        DDoS --> API
-    end
+    API --> Auth[Authentication Services]
+    API --> WebApp[Web Application Servers]
+    API --> DBProxy[Database Proxy]
     
-    subgraph "GitHub Core Services"
-        API --> Auth[Authentication<br/>Services]
-        API --> WebApp[Web Application<br/>Servers]
-        API --> DBProxy[Database Proxy]
-        
-        WebApp --> StaticAssets[Static Asset<br/>Storage]
-        
-        DBProxy --> PrimaryDB[(Primary Database<br/>Cluster)]
-        DBProxy --> ReadReplicas[(Read Replicas)]
-        
-        Auth --> UserData[(User Data Store)]
-    end
+    WebApp --> StaticAssets[Static Asset Storage]
+    DBProxy --> PrimaryDB[(Primary Database)]
+    DBProxy --> ReadReplicas[(Read Replicas)]
     
-    subgraph "Git Storage Layer"
-        WebApp --> GitService[Git Service]
-        GitService --> ObjectStorage[(Git Objects<br/>Storage)]
-        GitService --> RepoDB[(Repository<br/>Metadata DB)]
-        
-        ObjectStorage --- BackupService[Backup &<br/>Replication Service]
-    end
+    WebApp --> GitService[Git Service]
+    GitService --> ObjectStorage[(Git Objects Storage)]
+    GitService --> RepoDB[(Repository Metadata DB)]
     
-    subgraph "Auxiliary Services"
-        WebApp --> Search[Search Service]
-        WebApp --> CI_CD[CI/CD Runners]
-        WebApp --> Notification[Notification<br/>Service]
-        
-        Search --> SearchIndex[(Search Index)]
-        CI_CD --> ArtifactStorage[(Build Artifacts<br/>Storage)]
-        Notification --> MessageQueue[(Message Queue)]
-    end
-    
-    subgraph "Regional Replication"
-        BackupService --> GeoReplica1[(Geographic<br/>Replica 1)]
-        BackupService --> GeoReplica2[(Geographic<br/>Replica 2)]
-        BackupService --> GeoReplica3[(Geographic<br/>Replica 3)]
-    end
+    WebApp --> Search[Search Service]
+    WebApp --> CI_CD[CI/CD Runners]
+    WebApp --> Notification[Notification Service]
     
     Admin[Admin Users] --> FW
     Developers[Developers] --> FW
-    CITools[External CI/CD<br/>Tools] --> FW
+    CITools[External CI Tools] --> FW
