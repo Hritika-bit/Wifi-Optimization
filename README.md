@@ -21,6 +21,7 @@ This setup significantly improved the network’s **coverage**, **stability**, a
 
 ### Network Topology Diagram
 
+```mermaid
 graph TD
     Internet((Internet)) --> FW[Load Balancers & Firewalls]
     FW --> CDN[CDN Edge Cache]
@@ -47,3 +48,4 @@ graph TD
     Admin[Admin Users] --> FW
     Developers[Developers] --> FW
     CITools[External CI Tools] --> FW
+```
